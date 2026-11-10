@@ -1,0 +1,414 @@
+# Демонстрационная конфигурация Pt/SAPO-11 по статье:
+# К. Ф. Коледина и др., Журнал физической химии, 2026, 100(1), 76–86.
+# DOI: 10.7868/S3034553726010086
+#
+# RESULTS ARE NOT EXPERIMENTALLY VALIDATED
+# Кинетика статьи является apparent: она идентифицирована по мольным долям
+# и условному времени контакта. Совмещение с явной диффузией — только demo.
+
+schema_version: "1.0"
+model_version: V1
+run_mode: demo
+run_name: article_320C_demo
+description: >-
+  Демонстрационная внутренняя реакционно-диффузионная модель пористой
+  цилиндрической гранулы Pt/SAPO-11 при 320 °C и 3.0 MPa.
+
+references:
+  article_2026:
+    citation: >-
+      Koledina K. F. et al. Kinetics and mechanism of the catalytic
+      hydroisomerization of n-hexadecane in the presence of a Pt/SAPO-11
+      catalyst. Russian Journal of Physical Chemistry, 2026, 100(1), 76-86.
+    doi: 10.7868/S3034553726010086
+    local_file: ../elibrary_89338019_60996835.pdf
+
+model_warnings:
+  - RESULTS ARE NOT EXPERIMENTALLY VALIDATED
+  - Apparent article kinetics are not intrinsic kinetics.
+  - The article uses mole fractions and conditional contact time, not physical pellet time.
+  - Explicit diffusion plus article kinetics is a demo architecture case only.
+  - Gas-phase Knudsen transport is a demo assumption; the experiment used a gas-liquid feed.
+  - The V1 long-cylinder geometry is approximate because exact pellet dimensions are unavailable.
+
+provenance_templates:
+  article_conditions: &article_conditions
+    source_type: literature
+    source_reference: "Koledina et al. (2026), experimental section"
+    uncertainty: null
+    comment: "Value reported in the article."
+  article_table_1: &article_table_1
+    source_type: literature
+    source_reference: "Koledina et al. (2026), Table 1"
+    uncertainty: null
+    comment: "Value reported in the article."
+  article_table_4: &article_table_4
+    source_type: literature
+    source_reference: "Koledina et al. (2026), Table 4"
+    uncertainty: null
+    comment: "Apparent parameter fitted on mole-fraction data."
+  calculated: &calculated
+    source_type: estimated
+    source_reference: "Calculated from Koledina et al. (2026) article values"
+    uncertainty: null
+    comment: "Calculated demo value; not independently measured."
+  demo: &demo
+    source_type: temporary_demo
+    source_reference: "Demo assumption for software development"
+    uncertainty: null
+    comment: "Replace when measured or literature-supported data become available."
+
+conditions:
+  temperature:
+    value: 593.15
+    unit: K
+    <<: *article_conditions
+    comment: "320 °C; one of the article's experimental temperatures."
+  pressure:
+    value: 3.0e+6
+    unit: Pa
+    <<: *article_conditions
+    comment: "Article reactor pressure: 3.0 MPa."
+  experimental_phase:
+    value: gas_liquid
+    unit: "1"
+    <<: *article_conditions
+    comment: "The article describes a gas-liquid feed mixture."
+  pellet_phase_model:
+    value: gas_demo_approximation
+    unit: "1"
+    <<: *demo
+    comment: "Only for exercising the Knudsen provider; not a validated phase model."
+
+pellet:
+  geometry: long_cylinder_1d_approximation
+  equivalent_particle_diameter:
+    value: 3.0e-3
+    unit: m
+    source_type: estimated
+    source_reference: "Midpoint of the 2-4 mm particle size reported in Fig. 1"
+    uncertainty: 1.0e-3
+    comment: "Equivalent size, not a measured cylinder diameter."
+  radius:
+    value: 1.5e-3
+    unit: m
+    source_type: estimated
+    source_reference: "Half of the 3 mm equivalent demo diameter"
+    uncertainty: 5.0e-4
+    comment: "Exact pellet radius is not reported."
+  length:
+    value: 3.0e-3
+    unit: m
+    <<: *demo
+    comment: "Equivalent cylinder. L/(2R)=1, so the V1 long-cylinder assumption is not satisfied."
+  bed_bulk_density:
+    value: 642.0
+    unit: kg/m^3
+    <<: *article_conditions
+    comment: "Bed bulk density only; forbidden as pellet particle density."
+  skeletal_density:
+    value: 2200.0
+    unit: kg/m^3
+    <<: *demo
+    comment: "Engineering demo estimate for an aluminophosphate skeleton."
+  total_pore_volume:
+    value: 3.5e-4
+    unit: m^3/kg
+    <<: *calculated
+    comment: "0.07 + 0.28 cm^3/g = 0.35 cm^3/g."
+  particle_density:
+    value: 1242.937853
+    unit: kg/m^3
+    <<: *calculated
+    comment: "rho_p = 1/(V_pore + 1/rho_s), rho_s=2200 kg/m^3."
+  porosity:
+    mode: from_skeletal_density_and_pore_volume
+    value: 0.435028249
+    unit: "1"
+    <<: *calculated
+    comment: "epsilon = V_pore/(V_pore + 1/rho_s)."
+  bet_surface_area:
+    value: 2.60e+5
+    unit: m^2/kg
+    <<: *article_table_1
+    comment: "260 m^2/g converted to SI."
+  micropore_volume:
+    value: 7.0e-5
+    unit: m^3/kg
+    <<: *article_table_1
+    comment: "0.07 cm^3/g converted to SI."
+  mesopore_volume:
+    value: 2.8e-4
+    unit: m^3/kg
+    <<: *article_table_1
+    comment: "0.28 cm^3/g converted to SI."
+  pore_radius:
+    mode: calculated_from_total_pore_volume_and_bet
+    value: 2.692307692e-9
+    unit: m
+    <<: *calculated
+    comment: "Effective estimate r_pore=2*V_pore/S_BET."
+  tortuosity:
+    value: 3.0
+    unit: "1"
+    <<: *demo
+    comment: "Unmeasured demo estimate."
+
+# Representative formulas for lumped fractions are used only for demo diffusion.
+species:
+  C1: {name: n-C16H34, representative_formula: C16H34, molar_mass: {value: 0.22644, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H34", uncertainty: null, comment: "Theoretical molar mass."}}
+  C2: {name: mono-iso-C16H34, representative_formula: C16H34, molar_mass: {value: 0.22644, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H34", uncertainty: null, comment: "Theoretical molar mass."}}
+  C3: {name: multi-iso-C16H34, representative_formula: C16H34, molar_mass: {value: 0.22644, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H34", uncertainty: null, comment: "Theoretical molar mass."}}
+  C4: {name: H2, representative_formula: H2, molar_mass: {value: 0.002016, unit: kg/mol, source_type: estimated, source_reference: "Formula H2", uncertainty: null, comment: "Theoretical molar mass."}}
+  C5: {name: C2H6-C5H12, representative_formula: C4H10, molar_mass: {value: 0.05812, unit: kg/mol, source_type: temporary_demo, source_reference: "Representative midpoint lump C4H10", uncertainty: null, comment: "Replace with measured average."}}
+  C6: {name: C6H14-C14H30, representative_formula: C10H22, molar_mass: {value: 0.14229, unit: kg/mol, source_type: temporary_demo, source_reference: "Representative midpoint lump C10H22", uncertainty: null, comment: "Replace with measured average."}}
+  C7: {name: n-C16H32, representative_formula: C16H32, molar_mass: {value: 0.22443, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H32", uncertainty: null, comment: "Theoretical molar mass."}}
+  C8: {name: n-C16H33+, representative_formula: C16H33+, molar_mass: {value: 0.22544, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H33+", uncertainty: null, comment: "Electron mass neglected."}}
+  C9: {name: mono-iso-C16H33+, representative_formula: C16H33+, molar_mass: {value: 0.22544, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H33+", uncertainty: null, comment: "Electron mass neglected."}}
+  C10: {name: multi-iso-C16H33+, representative_formula: C16H33+, molar_mass: {value: 0.22544, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H33+", uncertainty: null, comment: "Electron mass neglected."}}
+  C11: {name: C2H4-C5H10, representative_formula: C4H8, molar_mass: {value: 0.05611, unit: kg/mol, source_type: temporary_demo, source_reference: "Representative midpoint lump C4H8", uncertainty: null, comment: "Replace with measured average."}}
+  C12: {name: C6H13-C14H29+, representative_formula: C10H21+, molar_mass: {value: 0.14128, unit: kg/mol, source_type: temporary_demo, source_reference: "Representative midpoint lump C10H21+", uncertainty: null, comment: "Electron mass neglected."}}
+  C13: {name: mono-iso-C16H32, representative_formula: C16H32, molar_mass: {value: 0.22443, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H32", uncertainty: null, comment: "Theoretical molar mass."}}
+  C14: {name: multi-iso-C16H32, representative_formula: C16H32, molar_mass: {value: 0.22443, unit: kg/mol, source_type: estimated, source_reference: "Formula C16H32", uncertainty: null, comment: "Theoretical molar mass."}}
+  C15: {name: C6H12-C14H28, representative_formula: C10H20, molar_mass: {value: 0.14027, unit: kg/mol, source_type: temporary_demo, source_reference: "Representative midpoint lump C10H20", uncertainty: null, comment: "Replace with measured average."}}
+
+kinetics:
+  model: article_apparent_demo
+  state_basis: concentration
+  native_parameter_basis: mole_fraction
+  parameter_type: apparent
+  demo_embedding:
+    enabled: true
+    normalization_concentration:
+      mode: ideal_gas_total_at_bulk_conditions
+      value: 608.306609
+      unit: mol/m^3
+      <<: *calculated
+      comment: "C_ref=P/(RT); only a demo normalization at 3 MPa."
+    source_time_coordinate: conditional_contact_time
+    source_time_unit: min
+    demo_time_mapping: "1 min conditional contact time -> 60 s elapsed time"
+    warning: "This time mapping is not experimentally justified."
+  acid_sites:
+    model: constant_activity
+    activity:
+      value: 1.0
+      unit: "1"
+      <<: *demo
+      comment: "Legacy-code assumption, not a physical concentration."
+    bronsted_inventory:
+      value: 0.091
+      unit: mol/kg
+      <<: *article_table_1
+      comment: "91 micromol/g from Table 1."
+    lewis_inventory:
+      value: 0.031
+      unit: mol/kg
+      <<: *article_table_1
+      comment: "31 micromol/g from Table 1."
+    estimated_bronsted_concentration:
+      value: 113.107345
+      unit: mol/m^3
+      <<: *calculated
+      comment: "0.091 mol/kg times estimated particle density; not used as H+=1."
+  arrhenius:
+    gas_constant: {value: 8.314462618, unit: J/(mol*K), source_type: literature, source_reference: "CODATA", uncertainty: null, comment: "SI gas constant."}
+    source_energy_unit: kcal/mol
+    source_k0_reference_unit: 1/min
+    note: "Table 4 labels k0 as min^-1 because source states are mole fractions."
+  reactions:
+    R1:
+      reversible: true
+      forward: {ln_k0: {value: 45.58, reference_unit: 1/min, <<: *article_table_4}, E: {value: 52.2, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 76.85, reference_unit: 1/min, <<: *article_table_4}, E: {value: 82.8, unit: kcal/mol, <<: *article_table_4}}
+    R2:
+      reversible: true
+      forward: {ln_k0: {value: 47.39, reference_unit: 1/min, <<: *article_table_4}, E: {value: 52.5, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 0.01, reference_unit: 1/min, <<: *article_table_4}, E: {value: 1.2, unit: kcal/mol, <<: *article_table_4}}
+    R3:
+      reversible: true
+      forward: {ln_k0: {value: 37.17, reference_unit: 1/min, <<: *article_table_4}, E: {value: 40.1, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 6.82, reference_unit: 1/min, <<: *article_table_4}, E: {value: 10.4, unit: kcal/mol, <<: *article_table_4}}
+    R4:
+      reversible: true
+      forward: {ln_k0: {value: 29.66, reference_unit: 1/min, <<: *article_table_4}, E: {value: 33.3, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 2.32, reference_unit: 1/min, <<: *article_table_4}, E: {value: 1.6, unit: kcal/mol, <<: *article_table_4}}
+    R5:
+      reversible: true
+      forward: {ln_k0: {value: 44.64, reference_unit: 1/min, <<: *article_table_4}, E: {value: 51.4, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 10.58, reference_unit: 1/min, <<: *article_table_4}, E: {value: 14.1, unit: kcal/mol, <<: *article_table_4}}
+    R6: {reversible: false, forward: {ln_k0: {value: 44.01, reference_unit: 1/min, <<: *article_table_4}, E: {value: 50.4, unit: kcal/mol, <<: *article_table_4}}}
+    R7: {reversible: false, forward: {ln_k0: {value: 33.25, reference_unit: 1/min, <<: *article_table_4}, E: {value: 40.2, unit: kcal/mol, <<: *article_table_4}}}
+    R8: {reversible: false, forward: {ln_k0: {value: 43.65, reference_unit: 1/min, <<: *article_table_4}, E: {value: 51.0, unit: kcal/mol, <<: *article_table_4}}}
+    R9:
+      reversible: true
+      forward: {ln_k0: {value: 46.68, reference_unit: 1/min, <<: *article_table_4}, E: {value: 48.4, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 77.23, reference_unit: 1/min, <<: *article_table_4}, E: {value: 89.2, unit: kcal/mol, <<: *article_table_4}}
+    R10:
+      reversible: true
+      forward: {ln_k0: {value: 44.81, reference_unit: 1/min, <<: *article_table_4}, E: {value: 48.7, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 2.58, reference_unit: 1/min, <<: *article_table_4}, E: {value: 2.6, unit: kcal/mol, <<: *article_table_4}}
+    R11: {reversible: false, forward: {ln_k0: {value: 48.41, reference_unit: 1/min, <<: *article_table_4}, E: {value: 59.4, unit: kcal/mol, <<: *article_table_4}}}
+    R12: {reversible: false, forward: {ln_k0: {value: 21.62, reference_unit: 1/min, <<: *article_table_4}, E: {value: 27.6, unit: kcal/mol, <<: *article_table_4}}}
+    R13:
+      reversible: true
+      forward: {ln_k0: {value: 33.93, reference_unit: 1/min, <<: *article_table_4}, E: {value: 36.3, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 43.82, reference_unit: 1/min, <<: *article_table_4}, E: {value: 50.6, unit: kcal/mol, <<: *article_table_4}}
+    R14:
+      reversible: true
+      forward: {ln_k0: {value: 45.00, reference_unit: 1/min, <<: *article_table_4}, E: {value: 51.9, unit: kcal/mol, <<: *article_table_4}}
+      reverse: {ln_k0: {value: 66.27, reference_unit: 1/min, <<: *article_table_4}, E: {value: 79.6, unit: kcal/mol, <<: *article_table_4}}
+    R15:
+      reversible: false
+      forward: {ln_k0: {value: 33.06, reference_unit: 1/min, <<: *article_table_4}, E: {value: 35.1, unit: kcal/mol, <<: *article_table_4}}
+      # Reverse reaction 15 is intentionally absent and forbidden.
+
+diffusion:
+  model: knudsen
+  phase_compatibility: gas_demo_only
+  calculate_effective_diffusivity: true
+  formula: "Deff_i=(porosity/tortuosity)*(2/3)*pore_radius*sqrt(8*R*T/(pi*M_i))"
+  reference_effective_diffusivity:
+    C1:  {value: 6.12946e-8, unit: m^2/s, <<: *calculated}
+    C2:  {value: 6.12946e-8, unit: m^2/s, <<: *calculated}
+    C3:  {value: 6.12946e-8, unit: m^2/s, <<: *calculated}
+    C4:  {value: 6.49612e-7, unit: m^2/s, <<: *calculated}
+    C5:  {value: 1.20986e-7, unit: m^2/s, <<: *calculated}
+    C6:  {value: 7.73236e-8, unit: m^2/s, <<: *calculated}
+    C7:  {value: 6.15685e-8, unit: m^2/s, <<: *calculated}
+    C8:  {value: 6.14304e-8, unit: m^2/s, <<: *calculated}
+    C9:  {value: 6.14304e-8, unit: m^2/s, <<: *calculated}
+    C10: {value: 6.14304e-8, unit: m^2/s, <<: *calculated}
+    C11: {value: 1.23134e-7, unit: m^2/s, <<: *calculated}
+    C12: {value: 7.75995e-8, unit: m^2/s, <<: *calculated}
+    C13: {value: 6.15685e-8, unit: m^2/s, <<: *calculated}
+    C14: {value: 6.15685e-8, unit: m^2/s, <<: *calculated}
+    C15: {value: 7.78783e-8, unit: m^2/s, <<: *calculated}
+
+bulk:
+  boundary_condition: fixed_surface_concentration
+  composition_input: mole_fraction
+  mole_fractions:
+    C1: 0.07
+    C2: 0.0
+    C3: 0.0
+    C4: 0.93
+    C5: 0.0
+    C6: 0.0
+    C7: 0.0
+    C8: 0.0
+    C9: 0.0
+    C10: 0.0
+    C11: 0.0
+    C12: 0.0
+    C13: 0.0
+    C14: 0.0
+    C15: 0.0
+  composition_basis: concentration
+  total_concentration:
+    value: 608.306609
+    unit: mol/m^3
+    <<: *calculated
+    comment: "Ideal-gas demo value P/(RT); not a validated gas-liquid EOS."
+  concentrations:
+    C1:  {value: 42.581463, unit: mol/m^3, source_type: estimated, source_reference: "y1=0.07 from current article-reproduction code and Ctot=P/(RT)", uncertainty: null, comment: "Demo normalization."}
+    C2:  {value: 0.0, unit: mol/m^3, <<: *demo}
+    C3:  {value: 0.0, unit: mol/m^3, <<: *demo}
+    C4:  {value: 565.725146, unit: mol/m^3, source_type: estimated, source_reference: "y4=0.93 from current article-reproduction code and Ctot=P/(RT)", uncertainty: null, comment: "Demo normalization."}
+    C5:  {value: 0.0, unit: mol/m^3, <<: *demo}
+    C6:  {value: 0.0, unit: mol/m^3, <<: *demo}
+    C7:  {value: 0.0, unit: mol/m^3, <<: *demo}
+    C8:  {value: 0.0, unit: mol/m^3, <<: *demo}
+    C9:  {value: 0.0, unit: mol/m^3, <<: *demo}
+    C10: {value: 0.0, unit: mol/m^3, <<: *demo}
+    C11: {value: 0.0, unit: mol/m^3, <<: *demo}
+    C12: {value: 0.0, unit: mol/m^3, <<: *demo}
+    C13: {value: 0.0, unit: mol/m^3, <<: *demo}
+    C14: {value: 0.0, unit: mol/m^3, <<: *demo}
+    C15: {value: 0.0, unit: mol/m^3, <<: *demo}
+
+initial_conditions:
+  model: bulk_equilibrated
+  profile_type: uniform
+  concentrations_from: bulk
+
+numerics:
+  spatial:
+    method: finite_volume
+    geometry: radial_cylinder
+    radial_cells: 100
+    grid: uniform
+  time:
+    mode: transient
+    start_time: {value: 0.0, unit: s}
+    end_time: {value: 3600.0, unit: s}
+    output_interval: {value: 5.0, unit: s}
+  solver:
+    backend: cvode
+    method: bdf
+    rtol: 1.0e-9
+    atol: {value: 1.0e-12, unit: mol/m^3}
+    max_steps: 100000
+    initial_step: {value: 1.0e-6, unit: s}
+    max_step: {value: 15.0, unit: s}
+    jacobian_mode: finite_difference
+    linear_solver: dense
+  steady_state:
+    derivative_tolerance: {value: 1.0e-10, unit: mol/(m^3*s)}
+    maximum_time: {value: 1.0e+7, unit: s}
+
+nonnegativity:
+  warning_tolerance: {value: 1.0e-11, unit: mol/m^3}
+  error_tolerance: {value: 1.0e-8, unit: mol/m^3}
+  clamp_negative_values: false
+
+validation:
+  material_balance: true
+  carbon_balance: true
+  hydrogen_balance: true
+  warn_for_ambiguous_lumped_formulas: true
+  analytical_cylinder_effectiveness_test: true
+  no_reaction_diffusion_test: true
+  infinite_diffusion_limit_test: true
+  grid_convergence:
+    enabled: false
+    radial_cells: [25, 50, 100, 200]
+    relative_tolerance: 1.0e-3
+
+output:
+  root_directory: results
+  run_directory_policy: run_name_plus_config_hash
+  overwrite_existing_run: false
+  format: csv
+  save_config: true
+  save_normalized_si_config: true
+  save_metadata: true
+  save_solver_statistics: true
+  save_time: true
+  save_coordinates: true
+  save_concentrations: true
+  save_average_concentrations: true
+  save_reaction_rates: true
+  save_effective_diffusivities: true
+  save_surface_fluxes: true
+  save_average_sources: true
+  save_effectiveness_factor: true
+  save_thiele_diagnostic: true
+  save_conversion: true
+  save_mass_balance_residual: true
+  save_energy_balance_residual: false
+
+plots:
+  concentration_profiles: true
+  concentrations_vs_time_at_center: true
+  concentrations_vs_time_at_surface: true
+  average_concentrations_vs_time: true
+  reaction_rates: true
+  effectiveness_factor: true
+  thiele_test_diagnostic: true
+  conversion: true
+  grid_convergence: true
+  selected_species: [C1, C2, C3, C4, C5, C6]
+  selected_times: {value: [0.0, 5.0, 15.0, 60.0, 3600.0], unit: s}
+  save_png: true
+  show: true
